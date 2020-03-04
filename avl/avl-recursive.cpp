@@ -87,9 +87,13 @@ class AVL
 public:
 	AVLNode<T> *root;
 
+	unsigned int levelsTraversed;
+
 	AVL()
 	{
 		this->root = NULL;
+
+		this->levelsTraversed = 0;
 	}
 
 	AVLNode<T> *insertRec(T value)
@@ -182,6 +186,8 @@ public:
 
 			if(!node->isBalanced())
 				needsRotating = true;
+
+			this->levelsTraversed++;
 		}
 
 		return needsRotating;
@@ -200,6 +206,8 @@ public:
 
 				this->updateNodesUpwards(node);
 			}
+
+			this->levelsTraversed++;
 		}
 	}
 
@@ -219,6 +227,8 @@ public:
 
 		for (AVLNode<T> *parent = node->parent; parent != NULL; parent = node->parent)
 		{
+			this->levelsTraversed++;
+
 			if(parent->value > node->value)
 				return parent;
 		}
@@ -233,6 +243,8 @@ public:
 
 		for (AVLNode<T> *parent = node->parent; parent != NULL; parent = node->parent)
 		{
+			this->levelsTraversed++;
+
 			if(parent->value < node->value)
 				return parent;
 		}
@@ -244,6 +256,8 @@ public:
 	{
 		if(node->left == NULL)
 			return node;
+
+		this->levelsTraversed++;
 		return this->findMinRec(node->left);
 	}
 
@@ -251,6 +265,8 @@ public:
 	{
 		if(node->right == NULL)
 			return node;
+
+		this->levelsTraversed++;
 		return this->findMaxRec(node->right);
 	}
 
@@ -282,10 +298,16 @@ private:
 		}
 
 		if(value < node->value)
+		{
+			this->levelsTraversed++;
 			return this->_insertRec(node->left, node, value);
+		}
 
 		if(value > node->value)
+		{
+			this->levelsTraversed++;
 			return this->_insertRec(node->right, node, value);
+		}
 
 		return node;
 	}
@@ -323,6 +345,8 @@ private:
 				AVLNode<T> *left = node->left;
 				node->value = left->value;
 				node = left;
+
+				this->levelsTraversed++;
 				this->_deleteRec(left, left->value);
 			}else
 			if(node->left == NULL && node->right != NULL)
@@ -330,6 +354,8 @@ private:
 				AVLNode<T> *right = node->right;
 				node->value = right->value;
 				node = right;
+
+				this->levelsTraversed++;
 				this->_deleteRec(right, right->value);
 			}else
 			{
@@ -345,8 +371,11 @@ private:
 			return true;
 		}
 
+		this->levelsTraversed++;
+
 		if(value < node->value)
 			return this->_deleteRec(node->left, value);
+
 		return this->_deleteRec(node->right, value);
 	}
 

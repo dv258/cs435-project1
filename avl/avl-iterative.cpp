@@ -343,10 +343,10 @@ public:
 
 		for (AVLNode<T> *parent = node->parent; parent != NULL; parent = node->parent)
 		{
+			this->levelsTraversed++;
+
 			if(parent->value > node->value)
 				return parent;
-
-			this->levelsTraversed++;
 		}
 
 		return NULL;
@@ -359,10 +359,10 @@ public:
 
 		for (AVLNode<T> *parent = node->parent; parent != NULL; parent = node->parent)
 		{
+			this->levelsTraversed++;
+
 			if(parent->value < node->value)
 				return parent;
-
-			this->levelsTraversed++;
 		}
 
 		return NULL;

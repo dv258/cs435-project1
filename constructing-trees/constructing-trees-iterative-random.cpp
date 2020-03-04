@@ -10,7 +10,6 @@
 
 int main(int argc, char *argv[])
 {
-	//vector<int> random = getSortedArray(10000);
 	vector<int> random = getRandomArray(10000);
 
 	AVL<int> avl;
