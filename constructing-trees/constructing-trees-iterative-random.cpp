@@ -21,6 +21,9 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < random.size(); i++)
 		avl.insertIter(random[i]);
 
+	while(avl.root != NULL)
+		avl.deleteIter(avl.root->value);
+
 	cout << "AVL levels: " << avl.levelsTraversed << endl;
 	cout << "Time taken: " << (float)(clock() - start) * 1000 / CLOCKS_PER_SEC << " ms" << endl;
 
@@ -29,7 +32,11 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < random.size(); i++)
 		bst.insertIter(random[i]);
 
+	while(bst.root != NULL)
+		bst.deleteIter(bst.root->value);
+
 	cout << "BST levels: " << bst.levelsTraversed << endl;
 	cout << "Time taken: " << (float)(clock() - start) * 1000 / CLOCKS_PER_SEC << " ms" << endl;
+
 	return 0;
 }
