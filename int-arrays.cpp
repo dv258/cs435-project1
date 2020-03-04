@@ -1,37 +1,20 @@
 #include <iostream>
+#include <set>
 #include <vector>
+
 #include <time.h>
 
 using namespace std;
 
 vector<int> getRandomArray(int n)
 {
-	vector<int> arr;
+	set<int> s;
 	int rnd;
 
-	for (int i = 0; i < n; i++)
-	{
-		while(true)
-		{
-			rnd = rand();
-
-			bool found = false;
-			for (int j = 0; j < arr.size(); j++)
-			{
-				if(arr[j] == rnd)
-				{
-					found = true;
-					break;
-				}
-			}
-
-			if(!found)
-				break;
-		}
-
-		arr.push_back(rnd);
-	}
-
+	while(s.size() < n)
+		s.insert(rand());
+	
+	vector<int> arr(s.begin(), s.end());
 	return arr;
 }
 
