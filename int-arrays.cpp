@@ -43,22 +43,3 @@ vector<int> getSortedArray(int n)
 
 	return arr;
 }
-
-int main(int argc, char *argv[])
-{
-	srand(time(NULL));
-
-	vector<int> arr = getRandomArray(32);
-
-	for (int i = 0; i < arr.size(); i++)
-		cout << arr[i] << " ";
-	cout << endl;
-
-	arr = getSortedArray(32);
-
-	for (int i = 0; i < arr.size(); i++)
-		cout << arr[i] << " ";
-	cout << endl;
-
-	return 0;
-}

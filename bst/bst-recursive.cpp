@@ -62,7 +62,7 @@ public:
 			return this->root;
 		}
 
-		return this->_insertRec(this->root, value);
+		return this->_insertRec(this->root, NULL, value);
 	}
 
 	bool deleteRec(T value)
@@ -72,28 +72,30 @@ public:
 
 	BSTNode<T> *findNextRec(BSTNode<T> *node)
 	{
-		if(node->right == NULL)
+		if(node->right != NULL)
+			return this->findMinRec(node->right);
+
+		for (BSTNode<T> *parent = node->parent; parent != NULL; parent = node->parent)
 		{
-			if(node->parent == NULL)
-				return NULL;
-			if(node->parent->value > node->value)
-				return node->parent;
-			return NULL;
+			if(parent->value > node->value)
+				return parent;
 		}
-		return this->findMinRec(node->right);
+
+		return NULL;
 	}
 
 	BSTNode<T> *findPrevRec(BSTNode<T> *node)
 	{
-		if(node->left == NULL)
+		if(node->left != NULL)
+			return this->findMaxRec(node->left);
+
+		for (BSTNode<T> *parent = node->parent; parent != NULL; parent = node->parent)
 		{
-			if(node->parent == NULL)
-				return NULL;
-			if(node->parent->value > node->value)
-				return node->parent;
-			return NULL;
+			if(parent->value < node->value)
+				return parent;
 		}
-		return this->findMaxRec(node->left);
+
+		return NULL;
 	}
 
 	BSTNode<T> *findMinRec(BSTNode<T> *node)
@@ -109,20 +111,36 @@ public:
 			return node;
 		return this->findMaxRec(node->right);
 	}
+
+	vector<T> getInOrder()
+	{
+		vector<T> vec;
+		inOrder(vec, this->root);
+		return vec;
+	}
+
 private:
-	BSTNode<T> *_insertRec(BSTNode<T> *node, T value)
+	BSTNode<T> *_insertRec(BSTNode<T> *node, BSTNode<T> *prev, T value)
 	{
 		if(node == NULL)
-			return new BSTNode<T>(value);
+		{
+			BSTNode<T> *newNode = new BSTNode<T>(value);
+			if(value < prev->value)
+			{
+				prev->setLeftChild(newNode);
+			}else
+			{
+				prev->setRightChild(newNode);
+			}
+
+			return newNode;
+		}
 
 		if(value < node->value)
-		{
-			node->setLeftChild(this->_insertRec(node->left, value));
-		}else
+			return this->_insertRec(node->left, node, value);
+
 		if(value > node->value)
-		{
-			node->setRightChild(this->_insertRec(node->right, value));
-		}
+			return this->_insertRec(node->right, node, value);
 
 		return node;
 	}
@@ -136,32 +154,40 @@ private:
 		{
 			if(node->left == NULL && node->right == NULL)
 			{
-				if(node->parent != NULL)
+				BSTNode<T> *parent = node->parent;
+
+				if(node != this->root)
 				{
-					if(node->parent->left == node)
+					if(parent->left == node)
 					{
-						node->parent->setLeftChild(NULL);
+						parent->setLeftChild(NULL);
 					}else
 					{
-						node->parent->setRightChild(NULL);
+						parent->setRightChild(NULL);
 					}
 				}else
 				{
 					this->root = NULL;
 				}
+
+				delete node;
+			}else
+			if(node->left != NULL && node->right == NULL)
+			{
+				BSTNode<T> *left = node->left;
+				node->value = left->value;
+				this->_deleteRec(left, left->value);
+			}else
+			if(node->left == NULL && node->right != NULL)
+			{
+				BSTNode<T> *right = node->right;
+				node->value = right->value;
+				this->_deleteRec(right, right->value);
 			}else
 			{
-				if(node->right != NULL)
-				{
-					BSTNode<T> *next = this->findNextRec(node);
-					node->value = next->value;
-					this->_deleteRec(next, next->value);
-				}else
-				{
-					BSTNode<T> *prev = this->findNextRec(node);
-					node->value = prev->value;
-					this->_deleteRec(prev, prev->value);
-				}
+				BSTNode<T> *replacer = this->findNextRec(node);
+				node->value = replacer->value;
+				this->_deleteRec(replacer, replacer->value);
 			}
 
 			return true;
@@ -171,22 +197,7 @@ private:
 			return this->_deleteRec(node->left, value);
 		return this->_deleteRec(node->right, value);
 	}
-public:
-	vector<T> getInOrder()
-	{
-		vector<T> vec;
-		inOrder(vec, this->root);
-		return vec;
-	}
 
-	void printInOrder(BSTNode<T> *node)
-	{
-		if(node->left != NULL)
-			printInOrder(node->left);
-		cout << node->value << " ";
-		if(node->right != NULL)
-			printInOrder(node->right);
-	}
 private:
 	void inOrder(vector<T> &vec, BSTNode<T> *node)
 	{
@@ -199,7 +210,7 @@ private:
 };
 
 template <typename T>
-vector<T> sort(vector<T> arr)
+vector<T> sortBST(vector<T> arr)
 {
 	BST<T> tree;
 
@@ -207,35 +218,4 @@ vector<T> sort(vector<T> arr)
 		tree.insertRec(arr[i]);
 
 	return tree.getInOrder();
-}
-
-int main(int argc, char *argv[])
-{
-	BST<int> tree;
-	tree.insertRec(6);
-	tree.insertRec(8);
-	tree.insertRec(9);
-	tree.insertRec(7);
-	tree.insertRec(1);
-	tree.insertRec(5);
-
-	tree.printInOrder(tree.root);
-	cout << endl;
-
-	cout << tree.findNextRec(tree.root)->value << endl;
-	cout << tree.findPrevRec(tree.root)->value << endl;
-
-	tree.deleteRec(8);
-	tree.printInOrder(tree.root);
-	cout << endl;
-	tree.deleteRec(1);
-	tree.printInOrder(tree.root);
-	cout << endl;
-	tree.deleteRec(5);
-	tree.printInOrder(tree.root);
-	cout << endl;
-	tree.deleteRec(6);
-	tree.printInOrder(tree.root);
-	cout << endl;
-	return 0;
 }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <queue>
 #include <vector>
 
 using namespace std;
@@ -10,6 +11,7 @@ public:
 	BSTNode<T> *parent;
 	BSTNode<T> *left;
 	BSTNode<T> *right;
+
 	T value;
 
 	BSTNode(T value)
@@ -17,6 +19,7 @@ public:
 		this->parent = NULL;
 		this->left = NULL;
 		this->right = NULL;
+
 		this->value = value;
 	}
 
@@ -49,9 +52,13 @@ class BST
 public:
 	BSTNode<T> *root;
 
+	unsigned int levelsTraversed;
+
 	BST()
 	{
 		this->root = NULL;
+
+		this->levelsTraversed = 0;
 	}
 
 	BSTNode<T> *insertIter(T value)
@@ -74,6 +81,7 @@ public:
 				}
 
 				node = node->left;
+				this->levelsTraversed++;
 			}else
 			if(value > node->value)
 			{
@@ -84,11 +92,14 @@ public:
 				}
 
 				node = node->right;
+				this->levelsTraversed++;
 			}else
 			{
 				break;
 			}
 		}
+
+		return NULL;
 	}
 
 	bool deleteIter(T value)
@@ -97,6 +108,9 @@ public:
 			return false;
 
 		BSTNode<T> *node = this->root;
+		BSTNode<T> *deleteJmp = NULL;
+
+	lbldelete:
 		while(true)
 		{
 			if(node == NULL)
@@ -105,59 +119,66 @@ public:
 			if(value < node->value)
 			{
 				node = node->left;
-			}else
+				this->levelsTraversed++;
+				continue;
+			}
 			if(value > node->value)
 			{
 				node = node->right;
-			}else
+				this->levelsTraversed++;
+				continue;
+			}
+
+			if(node->left == NULL && node->right == NULL)
 			{
-				if(node->left == NULL && node->right == NULL)
+				BSTNode<T> *parent = node->parent;
+
+				if(node != this->root)
 				{
-					if(node->parent != NULL)
+					if(parent->left == node)
 					{
-						if(node->parent->left == node)
-						{
-							node->parent->setLeftChild(NULL);
-						}else
-						{
-							node->parent->setRightChild(NULL);
-						}
+						parent->setLeftChild(NULL);
 					}else
 					{
-						this->root = NULL;
+						parent->setRightChild(NULL);
 					}
-					delete node;
 				}else
 				{
-					if(node->right != NULL)
-					{
-						BSTNode<T> *next = this->findNextIter(node);
-						node->value = next->value;
-						if(next->parent->left == next)
-						{
-							next->parent->setLeftChild(NULL);
-						}else
-						{
-							next->parent->setRightChild(NULL);
-						}
-						delete next;
-					}else
-					{
-						BSTNode<T> *prev = this->findPrevIter(node);
-						node->value = prev->value;
-						if(prev->parent->left == prev)
-						{
-							prev->parent->setLeftChild(NULL);
-						}else
-						{
-							prev->parent->setRightChild(NULL);
-						}
-						delete prev;
-					}
+					this->root = NULL;
 				}
 
-				return true;
+				delete node;
+			}else
+			if(node->left != NULL && node->right == NULL)
+			{
+				BSTNode<T> *left = node->left;
+				node->value = left->value;
+				node = left;
+				deleteJmp = left;
+			}else
+			if(node->left == NULL && node->right != NULL)
+			{
+				BSTNode<T> *right = node->right;
+				node->value = right->value;
+				node = right;
+				deleteJmp = right;
+			}else
+			{
+				BSTNode<T> *replacer = this->findNextIter(node);
+				node->value = replacer->value;
+				node = replacer;
+				deleteJmp = replacer;
 			}
+
+			if(deleteJmp != NULL)
+			{
+				node = deleteJmp;
+				value = deleteJmp->value;
+				deleteJmp = NULL;
+				goto lbldelete;
+			}
+
+			return true;
 		}
 
 		return false;
@@ -165,38 +186,43 @@ public:
 
 	BSTNode<T> *findNextIter(BSTNode<T> *node)
 	{
-		if(node->right == NULL)
+		if(node->right != NULL)
+			return this->findMinIter(node->right);
+
+		for (BSTNode<T> *parent = node->parent; parent != NULL; parent = node->parent)
 		{
-			if(node->parent == NULL)
-				return NULL;
-			if(node->parent->value > node->value)
-				return node->parent;
-			return NULL;
+			if(parent->value > node->value)
+				return parent;
+
+			this->levelsTraversed++;
 		}
-		return this->findMinIter(node->right);
+
+		return NULL;
 	}
 
 	BSTNode<T> *findPrevIter(BSTNode<T> *node)
 	{
-		if(node->left == NULL)
+		if(node->left != NULL)
+			return this->findMaxIter(node->left);
+
+		for (BSTNode<T> *parent = node->parent; parent != NULL; parent = node->parent)
 		{
-			if(node->parent == NULL)
-				return NULL;
-			if(node->parent->value > node->value)
-				return node->parent;
-			return NULL;
+			if(parent->value < node->value)
+				return parent;
+
+			this->levelsTraversed++;
 		}
-		return this->findMaxIter(node->left);
+
+		return NULL;
 	}
 
 	BSTNode<T> *findMinIter(BSTNode<T> *node)
 	{
-		while(true)
+		while(node->left != NULL)
 		{
-			if(node->left == NULL)
-				return node;
-
 			node = node->left;
+
+			this->levelsTraversed++;
 		}
 
 		return node;
@@ -204,12 +230,11 @@ public:
 
 	BSTNode<T> *findMaxIter(BSTNode<T> *node)
 	{
-		while(true)
+		while(node->right != NULL)
 		{
-			if(node->right == NULL)
-				return node;
-
 			node = node->right;
+
+			this->levelsTraversed++;
 		}
 
 		return node;
@@ -222,14 +247,6 @@ public:
 		return vec;
 	}
 
-	void printInOrder(BSTNode<T> *node)
-	{
-		if(node->left != NULL)
-			printInOrder(node->left);
-		cout << node->value << " ";
-		if(node->right != NULL)
-			printInOrder(node->right);
-	}
 private:
 	void inOrder(vector<T> &vec, BSTNode<T> *node)
 	{
@@ -242,7 +259,7 @@ private:
 };
 
 template <typename T>
-vector<T> sort(vector<T> arr)
+vector<T> sortBST(vector<T> arr)
 {
 	BST<T> tree;
 
@@ -250,35 +267,4 @@ vector<T> sort(vector<T> arr)
 		tree.insertIter(arr[i]);
 
 	return tree.getInOrder();
-}
-
-int main(int argc, char *argv[])
-{
-	BST<int> tree;
-	tree.insertIter(6);
-	tree.insertIter(8);
-	tree.insertIter(9);
-	tree.insertIter(7);
-	tree.insertIter(1);
-	tree.insertIter(5);
-
-	tree.printInOrder(tree.root);
-	cout << endl;
-
-	cout << tree.findNextIter(tree.root)->value << endl;
-	cout << tree.findPrevIter(tree.root)->value << endl;
-
-	tree.deleteIter(8);
-	tree.printInOrder(tree.root);
-	cout << endl;
-	tree.deleteIter(1);
-	tree.printInOrder(tree.root);
-	cout << endl;
-	tree.deleteIter(5);
-	tree.printInOrder(tree.root);
-	cout << endl;
-	tree.deleteIter(6);
-	tree.printInOrder(tree.root);
-	cout << endl;
-	return 0;
 }

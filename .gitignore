@@ -1,9 +1,15 @@
+avl/avl-iterative
+avl/avl-recursive
+bst/bst-recursive
+bst/bst-iterative
+constructing-trees/constructing-trees-iterative-random
+constructing-trees/constructing-trees-iterative-sorted
+constructing-trees/constructing-trees-recursive
+tmp/
 .~*
 *.docx
 *.odt
 *.png
 
 Project\ 1\ -\ Trees.pdf
-bst-recursive
-bst-iterative
 int-arrays
